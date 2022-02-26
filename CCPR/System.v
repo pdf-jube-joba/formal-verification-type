@@ -1,5 +1,5 @@
-Require Import T.SyntaxDefinition.
-Require Import T.Operation.
+Require Import CCPR.SyntaxDefinition.
+Require Import CCPR.Operation.
 
 Inductive ContextJudge : Context -> Type :=
   | Empty : ContextJudge nil

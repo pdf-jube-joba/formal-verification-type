@@ -1,4 +1,4 @@
--R type_theory/ T
+-R CCPR/ CCPR
 SyntaxDefinition.v
 Operation.v
 System.v

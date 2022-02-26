@@ -1,4 +1,4 @@
-Require Import T.SyntaxDefinition.
+Require Import CCPR.SyntaxDefinition.
 
 Parameter AlphaEq : Term -> Term -> Prop.
 Parameter AlphaEqb : Term -> Term -> bool.
