@@ -1,4 +1,3 @@
 -R CCPR/ CCPR
-SyntaxDefinition.v
-Operation.v
-System.v
+Definitions.v
+Theorems.v
