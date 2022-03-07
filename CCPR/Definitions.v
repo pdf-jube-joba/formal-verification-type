@@ -29,6 +29,12 @@ End Syntax.
 Section Operation.
 
 Definition removeVal := remove Nat.eq_dec.
+Fixpoint ListIn_dec x L :=
+  match L with
+  | nil => false
+  | h :: L' =>
+    if Nat.eqb x h then true else ListIn_dec x L'
+  end.
 
 Fixpoint FreeValueIn (M:Term) :=
   match M with
@@ -42,26 +48,26 @@ Fixpoint FreeValueIn (M:Term) :=
   end.
 
 Parameter Subst : Term -> id -> Term -> Term.
-Parameter VarCase1 : forall x y N , x = y ->
-  Subst (TVar x) y N = N.
-Parameter VarCase2 : forall x y N , ~ x = y ->
-  Subst (TVar x) y N = (TVar y).
+Parameter VarCase : forall x y N ,
+  Subst (TVar x) y N = if Nat.eqb x y then N else TVar y.
 Parameter SortCase : forall s y N , 
   Subst (TSort s) y N = TSort s.
-Parameter ForCase1 : forall x A B y N , x = y ->
-  Subst (TFor x A B) y N = TFor x A B.
-Parameter ForCase2 : forall x A B y N , ~ x = y -> ~ (In x (FreeValueIn N)) \/ ~ (In y (FreeValueIn B)) ->
-  Subst (TFor x A B) y N = TFor x A (Subst B y N).
-Parameter ForCase3 : forall x A B y N , ~ x = y -> (In x (FreeValueIn N)) /\ (In y (FreeValueIn B)) ->
-  exists z , ~ (In z (FreeValueIn N)) /\ (In z (FreeValueIn B)) /\
-  Subst (TFor x A B) y N = TFor z A (Subst (Subst B x (TVar z)) y N).
-Parameter FunCase1 : forall x A t y N , x = y ->
-  Subst (TFun x A t) y N = TFun x A t.
-Parameter FunCase2 : forall x A t y N , ~ x = y -> ~ (In x (FreeValueIn N)) \/ ~ (In y (FreeValueIn t)) ->
-  Subst (TFun x A t) y N = TFun x A (Subst t y N).
-Parameter FunCase3 : forall x A t y N , ~ x = y -> (In x (FreeValueIn N)) /\ (In y (FreeValueIn t)) ->
-  exists z , ~ (In z (FreeValueIn N)) /\ ~ (In z (FreeValueIn t)) /\
-  Subst (TFun x A t) y N = TFun z A (Subst (Subst t x (TVar z)) y N).
+Parameter ForCase : forall x A B y N ,
+  if Nat.eqb x y then
+    Subst (TFor x A B) y N = TFor x A B
+  else if orb (negb (ListIn_dec x (FreeValueIn N))) (negb (ListIn_dec y (FreeValueIn B))) then
+    Subst (TFor x A B) y N = TFor x A (Subst B y N)
+  else
+    exists z , andb (negb (ListIn_dec  z (FreeValueIn N))) (negb (ListIn_dec z (FreeValueIn B))) = true /\
+    Subst (TFor x A B) y N = TFor z A (Subst (Subst B x (TVar z)) y N).
+Parameter FunCase : forall x A B y N ,
+  if Nat.eqb x y then
+    Subst (TFun x A B) y N = TFun x A B
+  else if orb (negb (ListIn_dec x (FreeValueIn N))) (negb (ListIn_dec y (FreeValueIn B))) then
+    Subst (TFun x A B) y N = TFun x A (Subst B y N)
+  else
+    exists z , andb (negb (ListIn_dec  z (FreeValueIn N))) (negb (ListIn_dec z (FreeValueIn B))) = true /\
+    Subst (TFun x A B) y N = TFun z A (Subst (Subst B x (TVar z)) y N).
 Parameter AppCase : forall M1 M2 y N ,
   Subst (TApp M1 M2) y N = TApp (Subst M1 y N) (Subst M2 y N).
 Parameter RefCase : forall M1 M2 y N ,
